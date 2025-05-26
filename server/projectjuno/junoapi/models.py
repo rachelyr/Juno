@@ -84,21 +84,21 @@ class TaskAssignment(models.Model):
     class Meta:
         db_table = 'task_assignment'
 
-class Attatchment(models.Model):
+class Attachment(models.Model):
     file_url = models.URLField(max_length = 2048)
     file_name = models.CharField(max_length = 150)
-    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task_id = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="attachment")
     uploadedby_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'attatchment'
+        db_table = 'attachment'
 
     def __str__(self):
         return self.file_name
 
 class Comment(models.Model):
     text = models.CharField(max_length=150)
-    task_id = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task_id = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comment')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
