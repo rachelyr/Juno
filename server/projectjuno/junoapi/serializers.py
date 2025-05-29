@@ -43,7 +43,6 @@ class CommentSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True, source='author_userid')
     assigned = UserSerializer(read_only=True, source='assigned_userid')
-
     comment = CommentSerializer(many=True, read_only=True)
     attachment = AttachmentSerializer(many=True, read_only=True)
 

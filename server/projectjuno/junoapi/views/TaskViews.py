@@ -4,19 +4,14 @@ from rest_framework import generics
 
 from junoapi.models import Task
 from junoapi.serializers import TaskSerializer, TaskStatusSerializer
+from junoapi.selectors import get_tasks
 
 class TaskView(generics.ListCreateAPIView):
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        project_id = self.request.query_params.get('project_id')
-
-        if project_id:
-            queryset = queryset.filter(project_id=project_id)
-        
-        return queryset
+        project_id = self.request.query_params.get('project_id')    
+        return get_tasks(project_id=project_id)
     
 class UpdateTaskStatus(generics.UpdateAPIView):
     queryset = Task.objects.all()
