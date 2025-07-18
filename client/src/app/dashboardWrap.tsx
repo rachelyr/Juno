@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect } from 'react'
-import Navbar from '@/app/(components)/Navbar';
-import Sidebar from '@/app/(components)/Sidebar';
+import Navbar from '@/components/Navbar';
+import Sidebar from '@/components/Sidebar';
 import StoreProvider, { useAppSelector } from './redux';
 
 const DashboardLayout= ({children}: {children: React.ReactNode}) => {
@@ -13,7 +13,7 @@ const DashboardLayout= ({children}: {children: React.ReactNode}) => {
 
   //adding dark mode class to root element if true
   useEffect(() => {
-    if(!isDarkMode){
+    if(isDarkMode){
       document.documentElement.classList.add("dark");
     } else{
       document.documentElement.classList.remove("dark");
@@ -24,7 +24,9 @@ const DashboardLayout= ({children}: {children: React.ReactNode}) => {
     <div className='flex min-h-screen w-full bg-gray-50 text-gray-900'>
       {/*Sidebar*/}
       <Sidebar/>
-      <main className={`flex w-full flex-col bg-gray-50 dark:bg-dark-bg ${ isSidebarCollapsed ? "" : "md:pl-64"}`}>
+      <main className={`flex w-full flex-col bg-gray-50 dark:bg-dark-bg transition-all duration-300 ease-in-out ${ 
+        isSidebarCollapsed ? "" : "md:pl-64"
+      }`}>
         {/*NAVBAR*/}
         <Navbar/>
         {children}
