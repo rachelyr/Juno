@@ -9,6 +9,9 @@ const config: Config = {
     darkMode: "class",
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['"Noto Sans"', "sans-serif"]
+            },
             colors: {
                 white: "#ffffff",
                 gray: {
