@@ -19,5 +19,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('junoapi.urls')),
+    path('api/', include('junoapi.urls.taskUrls')),
+    path('api/', include('junoapi.urls.userUrls')),
+    path('api/tasks/<int:task_id>/', include('junoapi.urls.attachmentUrls')),
+    path('api/tasks/<int:task_id>/', include('junoapi.urls.commentUrls')),
 ]

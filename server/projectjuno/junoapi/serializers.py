@@ -2,14 +2,17 @@ from rest_framework import serializers
 from .models import User, Team, Task, TaskAssignment, Project, ProjectTeam, Attachment, Comment
 
 
-class TeamSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Team
-        fields = '__all__'
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
+        fields = '__all__'
+
+class TeamSerializer(serializers.ModelSerializer):
+    product_owner_username = serializers.CharField(source='productowner_userid.username', read_only=True)
+    project_manager_username = serializers.CharField(source='projectmanager_userid.username', read_only=True)
+
+    class Meta:
+        model = Team
         fields = '__all__'
 
 #may not be required
@@ -21,7 +24,8 @@ class TaskAssignmentSerializer(serializers.ModelSerializer):
 class AttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attachment
-        fields = '__all__'
+        fields = ['id','file_url','file_name','task_id','uploadedby_id']
+        read_only_fields = ['task_id','uploadedby_id']
     
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,9 +39,11 @@ class ProjectTeamSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CommentSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(read_only=True, source='user_id.username')
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ['id','text','task_id','user_id','username']
+        read_only_fields = ['task_id','user_id']
 
 #----Task serializers----
 class TaskSerializer(serializers.ModelSerializer):
