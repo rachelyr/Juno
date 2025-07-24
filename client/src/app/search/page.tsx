@@ -43,6 +43,9 @@ const search = () => {
         <div className='p-5'>
             {isLoading && <Loader/>}
             {isError && <p>Error occured while fetching results</p>}
+            {!searchResult && (
+                <img src="Search-rafiki.svg" alt="" className='h-[30%] w-[30%] justify-center items-center'/>
+            )}
             {!isLoading && !isError && searchResult && (
                 <div>
                     {searchResult.tasks && searchResult.tasks?.length > 0 && (
