@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from rest_framework import generics
+from django.db.models import Q  
 
 from junoapi.models import Task
 from junoapi.serializers import TaskSerializer, TaskStatusSerializer
 from junoapi.selectors import get_tasks
-from django.db.models import Q
 
 class TaskView(generics.ListCreateAPIView):
     serializer_class = TaskSerializer
@@ -12,6 +12,13 @@ class TaskView(generics.ListCreateAPIView):
     def get_queryset(self):
         project_id = self.request.query_params.get('project_id')    
         return get_tasks(project_id=project_id)
+    
+    # def perform_create(self, serializer):
+    #     task = serializer.save()
+    #     assigned_user = task.assigned_userid
+
+    #     if assigned_user:
+    #         send_task_assigned_notification(assigned_user, task.title)
     
 class UpdateTaskStatus(generics.UpdateAPIView):
     queryset = Task.objects.all()

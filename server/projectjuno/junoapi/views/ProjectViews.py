@@ -11,3 +11,12 @@ class ProjectView(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset
+    
+class DeleteProject(generics.DestroyAPIView):
+    queryset = Project.objects.all()
+    serializer_class= ProjectSerializer
+    # permission_classes = [isAuthenticated]
+
+    # def get_queryset(self):
+    #restrict delete access
+    #     return self.queryset.filter(owner=self.request.user)
