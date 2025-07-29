@@ -153,7 +153,7 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
                 assigned_userid: task.assigned_userid || 0
             });
         }
-    }, [task?.id]);
+    }, [task, editingField]);
 
     const handleFieldClick = (field: keyof TaskEditState): void => {
         setEditingField(field);

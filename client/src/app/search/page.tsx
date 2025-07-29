@@ -7,9 +7,10 @@ import TaskCard from '@/components/TaskCard';
 import UserCard from '@/components/UserCard';
 import { useSearchQuery } from '@/state/api';
 import {debounce} from 'lodash';
+import Image from 'next/image';
 import React, { useEffect, useState } from 'react'
 
-const search = () => {
+const Search = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const {data: searchResult, isLoading, isError} = useSearchQuery(searchTerm, {
         skip: searchTerm.length < 3
@@ -43,8 +44,8 @@ const search = () => {
         <div className='p-5'>
             {isLoading && <Loader/>}
             {isError && <p>Error occured while fetching results</p>}
-            {!searchResult && (
-                <img src="Search-rafiki.svg" alt="" className='h-[30%] w-[30%] justify-center items-center'/>
+            {searchResult?.tasks?.length == 0 && (
+                <Image src="Search-rafiki.svg" alt="" height={260} width={260} className='justify-center items-center'/>
             )}
             {!isLoading && !isError && searchResult && (
                 <div>
@@ -75,4 +76,4 @@ const search = () => {
   )
 }
 
-export default search;
+export default Search;

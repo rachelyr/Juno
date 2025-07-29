@@ -24,7 +24,6 @@ import {
 } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
-import notificationReducer from "@/state/notifSlice";
 
 /* REDUX PERSISTENCE */
 const createNoopStorage = () => {

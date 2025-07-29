@@ -1,7 +1,7 @@
 import { useAppSelector } from '@/app/redux';
 import Header from '@/components/Header';
 import { useGetTasksQuery } from '@/state/api';
-import React, { useEffect } from 'react'
+import React from 'react'
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import { dataGridClassNames, dataGridSxStyles } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';

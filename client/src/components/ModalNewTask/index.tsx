@@ -17,7 +17,7 @@ const ModalNewTask = ({isOpen, onClose, id = null}: Props) => {
     const [tags, setTags] = useState("");
     const [startDate, setStartDate] = useState("");
     const [dueDate, setDueDate] = useState("");
-    const [points, setPoints] = useState();
+    const [points] = useState();
     const [authorUserId, setAuthorUserId] = useState("");
     const [assignedUserId, setAssignedUserId] = useState("");
     const [projectId, setProjectId] = useState("");

@@ -48,7 +48,7 @@ const Users = () => {
               pagination
               className={dataGridClassNames}
               sx={dataGridSxStyles(isDarkMode)}
-              showToolbar //POST - write about using the slots attribute first and how it didnt work so i went into the documentation and fixed it
+              showToolbar
             />
         </div>
     </div>

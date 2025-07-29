@@ -1,10 +1,12 @@
 import React from 'react';
-import { Menu, MenuIcon, Moon, Search, Settings, Sun} from 'lucide-react';
+import { MenuIcon, Moon, Search, Settings, Sun} from 'lucide-react';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/app/redux';
 import { setIsDarkMode, setIsSidebarCollapsed } from '@/state';
 
+
 const Navbar = () => {
+
   const dispatch = useAppDispatch();
 
   const isSidebarCollapsed = useAppSelector(

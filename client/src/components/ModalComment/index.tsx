@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Header from '../Header'
 import { Comment, useCreateCommentMutation, useDeleteCommentMutation, useGetCommentsQuery } from '@/state/api';
-import { Delete, DeleteIcon, Trash } from 'lucide-react';
+import {Trash } from 'lucide-react';
 
 type Props = {
     taskId: number;
@@ -61,7 +61,7 @@ const ModalComment = ({taskId, userId}: Props) => {
           onChange={(e) => setNewComment(e.target.value)}
           placeholder='Add a comment...'
           rows={2}
-          className='w-full p-2 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500'
+          className='w-full p-2 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white'
           disabled={isSubmitting}
         />
         <button
@@ -80,9 +80,9 @@ const ModalComment = ({taskId, userId}: Props) => {
           <div className='text-center text-gray-500 py-4'>No comments</div>
         ) : (
           comments.map((comment: Comment) => (
-            <div key={comment.id} className='bg-gray-50 p-3 rounded'>
+            <div key={comment.id} className='bg-gray-50 p-3 rounded dark:bg-dark-teritary'>
               <div className='flex justify-between items-start mb-1'>
-                <span className='font-medium text-sm'>{comment.username}</span>
+                <span className='font-medium text-sm dark:text-white'>{comment.username}</span>
                 <div className='flex items-center space-x-2'>
                   {comment.user_id === userId && (
                     <button
@@ -94,7 +94,7 @@ const ModalComment = ({taskId, userId}: Props) => {
                   )}
                 </div>
               </div>
-              <p className='text-sm text-gray-700'>{comment.text}</p>
+              <p className='text-sm text-gray-700 dark:text-white'>{comment.text}</p>
             </div>
           ))
         )}

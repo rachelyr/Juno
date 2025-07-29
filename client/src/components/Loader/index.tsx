@@ -1,11 +1,11 @@
+import Image from 'next/image';
 import React from 'react'
 
-type Props = {}
 
-const Loader = (props: Props) => {
+const Loader = () => {
   return (
     <div className='flex justify-center items-center min-h-screen bg-white dark:bg-dark-bg'>
-        <img src="/Spinner.svg" alt="Loading..." className='w-25 h-25'/>
+        <Image src="/Spinner.svg" alt="Loading..." width={80} height={80}/>
     </div>
   )
 }

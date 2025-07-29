@@ -1,11 +1,10 @@
 import Header from '@/components/Header';
 import React from 'react'
 
-type Props = {}
 
 //needs changing upon login/logout setup
 
-const settings = (props: Props) => {
+const settings = () => {
     const userSettings = {
         username: "rach",
         email: "rach@gmail.com",

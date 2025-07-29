@@ -1,6 +1,6 @@
-import { useGetTasksQuery, useUpdateTaskStatusMutation } from '@/state/api';
+import { Status, useGetTasksQuery, useUpdateTaskStatusMutation } from '@/state/api';
 import React from 'react'
-import {DndProvider, useDrag, useDrop} from "react-dnd";
+import {DndProvider, DragSourceMonitor, DropTargetMonitor, useDrag, useDrop} from "react-dnd";
 import {HTML5Backend} from "react-dnd-html5-backend";
 import {Task as TaskType} from "@/state/api";
 import { EllipsisVertical, MessageSquareMore, Plus } from 'lucide-react';
@@ -14,7 +14,12 @@ type BoardProps = {
   onEditTask: (task: TaskType) => void;
 };
 
-const taskStatus = ["To Do","Work In Progress", "Under Review", "Completed"];
+const taskStatus: Status[] = [
+  Status.ToDo,
+  Status.WorkInProgess,
+  Status.UnderReview,
+  Status.Completed
+];
 
 const BoardView = ({id, setIsModalNewTaskOpen, onEditTask}: BoardProps) => {
 
@@ -22,7 +27,7 @@ const BoardView = ({id, setIsModalNewTaskOpen, onEditTask}: BoardProps) => {
 
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
 
-  const moveTask = (task_id: number, toStatus: string) => {
+  const moveTask = (task_id: number, toStatus: Status) => {
     updateTaskStatus({task_id, status: toStatus})
   };
 
@@ -50,9 +55,9 @@ const BoardView = ({id, setIsModalNewTaskOpen, onEditTask}: BoardProps) => {
 };
 
 type TaskColumnProps = {
-  status: string;
+  status: Status;
   tasks: TaskType[]
-  moveTask: ( task_id: number, toStatus: string) => void;
+  moveTask: ( task_id: number, toStatus: Status) => void;
   setIsModalNewTaskOpen: (isOpen: boolean) => void;
   onEditTask: (task: TaskType) => void;
 }
@@ -61,14 +66,14 @@ const TaskColumn = ({status, tasks, moveTask, setIsModalNewTaskOpen, onEditTask 
   const [{isOver}, drop] = useDrop(() => ({
     accept: "task",
     drop: (item: {id: number}) => moveTask(item.id, status),
-    collect: (monitor: any) => ({
+    collect: (monitor: DropTargetMonitor) => ({ //changes made
       isOver: !!monitor.isOver()
     })
   }), [status, moveTask]);
 
   const taskCount = tasks.filter((task) => task.status === status).length;
 
-  const statusColor: any = {
+  const statusColor: Record<Status, string>= {
     "To Do": "#2563EB",
     "Work In Progress": "#059669",
     "Under Review": "#D97706",
@@ -123,7 +128,7 @@ const Task = ({task, onEditTask}: TaskProps) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "task",
     item: {id: task.id},
-    collect: (monitor: any) => ({
+    collect: (monitor: DragSourceMonitor) => ({
       isDragging: !!monitor.isDragging()
     })
   }), [task.id]);

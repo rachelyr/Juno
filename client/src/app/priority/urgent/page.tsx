@@ -2,9 +2,8 @@ import React from 'react'
 import ReusablePage from '../reusablePage'
 import { Priority } from '@/state/api'
 
-type Props = {}
 
-const urgent = (props: Props) => {
+const urgent = () => {
   return (
     <ReusablePage priority={Priority.Urgent}/>
   )
