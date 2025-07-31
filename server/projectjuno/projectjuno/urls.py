@@ -21,8 +21,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('junoapi.urls.taskUrls')),
     path('api/', include('junoapi.urls.userUrls')),
-    path('api/teams', include('junoapi.urls.teamUrls')),
-    path('api/projects', include('junoapi.urls.projectUrls')),
+    path('api/teams/', include('junoapi.urls.teamUrls')),
+    path('api/projects/', include('junoapi.urls.projectUrls')),
     path('api/tasks/<int:task_id>/', include('junoapi.urls.attachmentUrls')),
     path('api/tasks/<int:task_id>/', include('junoapi.urls.commentUrls')),
 ]
