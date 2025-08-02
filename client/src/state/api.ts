@@ -189,7 +189,7 @@ export const api = createApi({
             ]
         }),
         search: build.query<SearchResult, string>({
-            query: (q) => `api/search?q=${q}`,
+            query: (q) => `api/search/?q=${q}`,
         }),
     }),
 });
