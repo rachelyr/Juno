@@ -87,7 +87,7 @@ export const api = createApi({
     tagTypes: ["Project", "Task", "Users","Teams","Attachments","Comments"],
     endpoints: (build) => ({
         getProjects: build.query<Project[], void>({
-            query: () => "api/projects",  //short hand notation
+            query: () => "api/projects/",  //short hand notation
             providesTags: ["Project"],
         }),
         createProjects: build.mutation<Project[], Partial<Project>>({ //mutation is used to create
@@ -144,11 +144,11 @@ export const api = createApi({
                 : [{type: "Task", id: id}] //problem  tag name mismatch Tasks instead of Task written
         }),
         getUsers: build.query<User[], void>({
-            query: () => "api/users",
+            query: () => "api/users/",
             providesTags: ["Users"]
         }),
         getTeams: build.query<Team[], void>({
-            query: () => "api/teams",
+            query: () => "api/teams/",
             providesTags: ["Teams"]
         }),
         createAttachment: build.mutation<Attachment[], {task_id: number; user_id: number; data: FormData}>({ //mutation is used to create
