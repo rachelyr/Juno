@@ -4,6 +4,7 @@ import React, { useEffect } from 'react'
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import StoreProvider, { useAppSelector } from './redux';
+import AuthProvider from './authProvider';
 
 const DashboardLayout= ({children}: {children: React.ReactNode}) => {
   const isSidebarCollapsed = useAppSelector(
@@ -39,7 +40,9 @@ const DashboardLayout= ({children}: {children: React.ReactNode}) => {
 const DashboardWrap = ({children}: {children: React.ReactNode}) => {
   return (
     <StoreProvider> {/*so our entire application has access to redux - did this seperately to access global state in dashboard*/}
-      <DashboardLayout>{children}</DashboardLayout>
+      <AuthProvider>
+        <DashboardLayout>{children}</DashboardLayout>
+      </AuthProvider>
     </StoreProvider>
   )
 }
