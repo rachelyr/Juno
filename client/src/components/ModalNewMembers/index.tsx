@@ -1,7 +1,6 @@
 import Modal from '@/components/Modal';
 import { useAddTeamMembersMutation, useSearchUsersQuery } from '@/state/api';
 import React, { useState } from 'react'
-import Header from '../Header';
 import { debounce } from 'lodash';
 import { X } from 'lucide-react';
 

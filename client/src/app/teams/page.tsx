@@ -7,7 +7,7 @@ import Header from '@/components/Header';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { dataGridClassNames, dataGridSxStyles } from '@/lib/utils';
 import Loader from '@/components/Loader';
-import { PlusSquare, PlusSquareIcon, User, Users } from 'lucide-react';
+import { PlusSquare, User, Users } from 'lucide-react';
 import ModalNewTeam from '@/components/ModalNewTeam';
 import ModalNewMembers from '@/components/ModalNewMembers';
 import TeamProject from '@/components/TeamProject';
