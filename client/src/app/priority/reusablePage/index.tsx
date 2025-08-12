@@ -10,6 +10,7 @@ import { Priority, Task, useGetTaskByUserQuery } from '@/state/api';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { format, parseISO } from 'date-fns';
 import React, { useState } from 'react'
+import { useGetAuthUserQuery } from '../../../state/api';
 
 type Props = {
     priority: Priority
@@ -81,7 +82,8 @@ const ReusablePage = ({priority}: Props) => {
     const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
 
     //will change after using cognito
-    const userId = 2;
+    const {data: currentUser} = useGetAuthUserQuery({});
+    const userId = currentUser?.userDetails?.id;
     const {data: task, isLoading, isError: isTasksError} = useGetTaskByUserQuery(userId || 0, {
         skip: userId === null
     });

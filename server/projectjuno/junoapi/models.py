@@ -17,6 +17,7 @@ class Team(models.Model):
         null=True, blank=True,
         related_name= 'team_project_manager'
     )
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='team_members',blank=True)
 
     class Meta:
         db_table = 'team'
@@ -26,9 +27,8 @@ class Team(models.Model):
     
 
 class User(AbstractUser):
-    cognito_id = models.CharField()
-    profilepicture_id = models.CharField(blank=True) #S3 or cloudinary
-    team_id = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
+    cognito_id = models.CharField(max_length=255 ,unique=True)
+    profilepicture_id = models.CharField(max_length=500, blank=True)
 
     class Meta:
         db_table = 'user'
@@ -41,6 +41,7 @@ class Project(models.Model):
     description = models.CharField(max_length=250)
     start_date = models.DateTimeField()
     due_date = models.DateTimeField()
+    owner_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='project_owner')
 
     class Meta:
         db_table = 'project'

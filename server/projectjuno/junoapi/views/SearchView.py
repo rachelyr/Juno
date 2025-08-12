@@ -42,3 +42,16 @@ class SearchView(APIView):
             'tasks': task_data,
             'projects': project_data
         })
+    
+class UserSearchView(APIView):
+    def get(self, request):
+        q = request.query_params.get('q', '')
+
+        users = User.objects.annotate(
+            similarity = TrigramSimilarity('username',q)
+        ).filter(
+            Q(username__icontains=q) |
+            Q(similarity__gt=0.2)
+        ).values('id','username')
+
+        return Response({"users": users})

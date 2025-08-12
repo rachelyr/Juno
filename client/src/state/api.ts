@@ -1,4 +1,5 @@
 import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
+import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 
 export interface Project{
     id: number;
@@ -66,11 +67,18 @@ export interface SearchResult{
     users?: User[];
 }
 
+export interface SearchUsersResult{
+    users?: User[]
+}
+
 export interface Team{
-    teamId: number;
-    teamName: string;
+    id: number;
+    domain_name: string;
     productowner_userid?: number;
     projectmanager_userid?: number;
+    product_owner_username?: string;
+    project_manager_username?: string;
+    members?: string[];
 }
 
 export interface Comment{
@@ -81,11 +89,34 @@ export interface Comment{
     username: string;
 }
 
+export interface TeamProject{
+    team_id: number;
+    project_id: number;
+}
+
 export const api = createApi({
     baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL}),
     reducerPath: "api",
-    tagTypes: ["Project", "Task", "Users","Teams","Attachments","Comments"],
+    tagTypes: ["Project", "Task", "Users","Teams","TeamProject","Attachments","Comments"],
     endpoints: (build) => ({
+        getAuthUser: build.query({
+            queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
+                try{
+                    const user = await getCurrentUser();
+                    const session = await fetchAuthSession();
+                    if(!session) throw new Error("No session found");
+                    const {userSub} = session;
+                    // const {accessToken} = session.tokens ?? {};
+
+                    const userDetailsResponse = await fetchWithBQ(`api/users/${userSub}`);
+                    const userDetails = userDetailsResponse.data as User;
+
+                    return {data : {user, userSub, userDetails}}
+                } catch(error: any){
+                    return {error: error.message || "Could not fetch user data"};
+                }
+            }
+        }),
         getProjects: build.query<Project[], void>({
             query: () => "api/projects/",  //short hand notation
             providesTags: ["Project"],
@@ -107,7 +138,7 @@ export const api = createApi({
                 ]
                 : [{ type: "Task" as const, id: "LIST" }],
         }),
-        createTasks: build.mutation<Task[], Partial<Task>>({ //mutation is used to create
+        createTasks: build.mutation<Task[], Partial<Task>>({
             query: (task) => ({
                 url: "api/tasks/",
                 method: "POST",
@@ -151,6 +182,43 @@ export const api = createApi({
             query: () => "api/teams/",
             providesTags: ["Teams"]
         }),
+        createTeams: build.mutation<Team[], Partial<Team>>({
+            query: (team) => ({
+                url: "api/teams/",
+                method: "POST",
+                body: team
+            }),
+            invalidatesTags: ["Teams"]
+        }),
+        addTeamMembers: build.mutation<Team, {members: string[]; team_id: number}>({
+            query: ({members, team_id}) => ({
+                url: `api/teams/${team_id}/members/`,
+                method: 'PATCH',
+                body: {members}
+            }),
+            invalidatesTags: (result, error,{team_id}) => [
+                {type: "Teams", id: team_id},
+                {type: "Teams", id: "LIST"}
+            ]  
+        }),
+        createTeamProject: build.mutation<TeamProject[], {team_id: number; project_id: number}>({
+            query: ({team_id, project_id}) => ({
+                url: `api/teams/${team_id}/project/${project_id}`,
+                method: "POST"
+            }),
+            invalidatesTags: ["TeamProject"]
+        }),
+        getTeamProject: build.query<TeamProject[], void>({
+            query: () => "api/teams/project",  //short hand notation
+            providesTags: ["TeamProject"],
+        }),
+        removeTeamProject: build.mutation<TeamProject[], {teamId: number, projectId: number}> ({
+            query: ({teamId, projectId}) => ({
+                url: `api/teams/${teamId}/project/${projectId}/delete`,
+                method: "DELETE"
+            }),
+            invalidatesTags: ["TeamProject"]
+        }),
         createAttachment: build.mutation<Attachment[], {task_id: number; user_id: number; data: FormData}>({ //mutation is used to create
             query: ({task_id, user_id, data}) => ({
                 url: `api/tasks/${task_id}/attachments?user_id=${user_id}`,
@@ -191,10 +259,14 @@ export const api = createApi({
         search: build.query<SearchResult, string>({
             query: (q) => `api/search/?q=${q}`,
         }),
+        searchUsers: build.query<SearchUsersResult, string>({
+            query: (q) => `api/teams/search/?q=${q}`,
+        }),
     }),
 });
 
 export const {
+    useGetAuthUserQuery,
     useGetProjectsQuery,
     useCreateProjectsMutation,
     useGetTasksQuery,
@@ -204,10 +276,16 @@ export const {
     useGetUsersQuery,
     useSearchQuery,
     useGetTeamsQuery,
+    useCreateTeamsMutation,
+    useAddTeamMembersMutation,
+    useCreateTeamProjectMutation,
+    useGetTeamProjectQuery,
+    useRemoveTeamProjectMutation,
     useCreateAttachmentMutation,
     useGetAttachmentsQuery,
     useGetTaskByUserQuery,
     useCreateCommentMutation,
     useGetCommentsQuery,
-    useDeleteCommentMutation
+    useDeleteCommentMutation,
+    useSearchUsersQuery
 } = api;

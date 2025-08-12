@@ -10,10 +10,20 @@ class UserSerializer(serializers.ModelSerializer):
 class TeamSerializer(serializers.ModelSerializer):
     product_owner_username = serializers.CharField(source='productowner_userid.username', read_only=True)
     project_manager_username = serializers.CharField(source='projectmanager_userid.username', read_only=True)
+    members = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Team
         fields = '__all__'
+
+    def get_members(self, obj):
+        return[
+            {
+                'id': member.id,
+                'username': member.username,
+                'email': member.email
+            } for member in obj.members.all()
+        ]
 
 #may not be required
 class TaskAssignmentSerializer(serializers.ModelSerializer):
@@ -30,7 +40,11 @@ class AttachmentSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = ['id','name','description','start_date','due_date','owner_id']
+
+    def create(self, validated_data):
+        validated_data['owner_id'] = self.context['request'].user
+        return super().create(validated_data)
 
 #may not be required
 class ProjectTeamSerializer(serializers.ModelSerializer):
