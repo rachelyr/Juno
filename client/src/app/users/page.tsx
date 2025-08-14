@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Image from 'next/image';
 import { dataGridClassNames, dataGridSxStyles } from '@/lib/utils';
+import Loader from '@/components/Loader';
 
 // const CustomeToolbar = () => (
   
@@ -34,7 +35,7 @@ const Users = () => {
     const {data: users, isLoading, isError} = useGetUsersQuery();
     const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
-    if(isLoading) return <div>Loading...</div>
+    if(isLoading) return <Loader/>
     if(isError || !users) return <div>Error fetching users...</div>
 
   return (
@@ -44,7 +45,7 @@ const Users = () => {
             <DataGrid
               rows={users || []}
               columns={columns}
-              getRowId={(row) => row.id}
+              getRowId={(row) => row.cognito_id}
               pagination
               className={dataGridClassNames}
               sx={dataGridSxStyles(isDarkMode)}
