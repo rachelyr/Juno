@@ -5,7 +5,7 @@ from .models import User, Team, Task, TaskAssignment, Project, ProjectTeam, Atta
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['username','cognito_id','profilepicture_id']
 
 class TeamSerializer(serializers.ModelSerializer):
     product_owner_username = serializers.CharField(source='productowner_userid.username', read_only=True)
