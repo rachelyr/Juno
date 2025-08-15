@@ -5,7 +5,7 @@ from .models import User, Team, Task, TaskAssignment, Project, ProjectTeam, Atta
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username','cognito_id','profilepicture_id']
+        fields = ['id','username','cognito_id','profilepicture_id']
 
 class TeamSerializer(serializers.ModelSerializer):
     product_owner_username = serializers.CharField(source='productowner_userid.username', read_only=True)
@@ -43,7 +43,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = ['id','name','description','start_date','due_date','owner_id']
 
     def create(self, validated_data):
-        validated_data['owner_id'] = self.context['request'].user
+        user = self.context['request'].user
+        validated_data['owner_id'] = user
         return super().create(validated_data)
 
 #may not be required

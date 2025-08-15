@@ -9,9 +9,6 @@ import Image from 'next/image';
 import { dataGridClassNames, dataGridSxStyles } from '@/lib/utils';
 import Loader from '@/components/Loader';
 
-// const CustomeToolbar = () => (
-  
-// )
 
 const columns: GridColDef[] = [
     {field: "id", headerName: "ID", width: 100},
