@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from junoapi.authentication import CognitoJWTAuthentication
 
 class GetUserView(generics.ListCreateAPIView):
     queryset = User.objects.all()
@@ -59,8 +61,16 @@ class CreateUserView(APIView):
                 'message': f'Error creating user: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-class GetUserById(generics.RetrieveAPIView):
-    permission_classes=[AllowAny]
-    queryset=User.objects.all()
-    serializer_class=UserSerializer
-    lookup_field='cognito_id'
+class GetUserById(APIView):
+    authentication_classes = [CognitoJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, user_sub):
+        try:
+            user = User.objects.get(cognito_id=user_sub)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)

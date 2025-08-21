@@ -5,7 +5,7 @@ from .models import User, Team, Task, TaskAssignment, Project, ProjectTeam, Atta
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','username','cognito_id','profilepicture_id']
+        fields = ['id','username','email','cognito_id','profilepicture_id']
 
 class TeamSerializer(serializers.ModelSerializer):
     product_owner_username = serializers.CharField(source='productowner_userid.username', read_only=True)
@@ -44,6 +44,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context['request'].user
+        if not user.is_authenticated:
+            raise serializers.ValidationError("Authenticated user required")
         validated_data['owner_id'] = user
         return super().create(validated_data)
 

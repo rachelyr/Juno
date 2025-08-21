@@ -11,9 +11,9 @@ class SearchView(APIView):
         q = request.query_params.get('q', '')
 
         users = User.objects.annotate(
-            similarity = TrigramSimilarity('first_name',q)
+            similarity = TrigramSimilarity('username',q)
         ).filter(
-            Q(first_name__icontains=q) |
+            Q(username__icontains=q) |
             Q(similarity__gt=0.2) #the similarity threshold
         )
 

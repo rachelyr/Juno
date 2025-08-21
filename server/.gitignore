@@ -20,3 +20,8 @@ env/
 ENV/
 *.env.*
 
+#cognito bypass - local auth testing
+middleware/
+
+#auth
+cognito_users.json

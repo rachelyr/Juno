@@ -9,22 +9,22 @@ from django.db import transaction
 
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from rest_framework import status
 
     
 class ListCreateTeamView(generics.ListCreateAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    # permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticated]
 
     def get_queryset(self):
-        # user = self.request.user
-        # return Team.objects.filter(
-        #     Q(productowner_userid=user) |
-        #     Q(productowner_userid=user) |
-        #     Q(members=user)
-        #     ).distinct()
-        return get_teams(self)
+        user = self.request.user
+        return Team.objects.filter(
+            Q(productowner_userid=user) |
+            Q(productowner_userid=user) |
+            Q(members=user)
+            ).distinct()
 
     def create(self, request, *args, **kwargs):
         member_usernames = request.data.get('members', [])
@@ -86,14 +86,19 @@ class AddTeamMemberView(generics.UpdateAPIView):
 class deleteTeam(generics.DestroyAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    lookup_field= 'pk'
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            Q(productowner_userid=self.request.user.id) |
+            Q(projectmanager_userid=self.request.user.id)
+        )
 
 class AttachProjectToTeamView(APIView):
-    def post(self, request, team_id, project_id):  # Add parameters here
+    def post(self, request, team_id, project_id):
         if not team_id or not project_id:
             return Response({'detail': 'team_id and project_id are required.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Rest of your code remains the same
         try:
             team = Team.objects.get(id=team_id)
             project = Project.objects.get(id=project_id)
@@ -118,8 +123,18 @@ class GetTeamProject(generics.ListAPIView):
 class RemoveTeamProject(generics.DestroyAPIView):
     queryset = ProjectTeam.objects.all()
     serializer_class = ProjectTeamSerializer
-    
+    permission_classes = [IsAuthenticated]
+
     def get_object(self):
         team_id = self.kwargs['team_id']
         project_id = self.kwargs['project_id']
-        return ProjectTeam.objects.get(team_id=team_id, project_id=project_id)
+
+        project_team = ProjectTeam.objects.get(team_id=team_id, project_id=project_id)
+
+        team = project_team.team_id
+        user = self.request.user
+
+        if(team.productowner_userid != user and team.projectmanager_userid != user):
+            raise PermissionDenied("Only the Product Owner or Project Manager can remove this project from the team.")
+
+        return project_team
