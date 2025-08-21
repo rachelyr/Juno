@@ -7,6 +7,7 @@ export interface Project{
     description?: string;
     start_date?: string;
     due_date?: string;
+    owner_id: number;
 }
 
 export enum Status{
@@ -99,9 +100,9 @@ export const api = createApi({
         baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
         prepareHeaders: async (headers) => {
             const session = await fetchAuthSession();
-            const {accessToken} = session.tokens ?? {};
-            if(accessToken){
-                headers.set("Authorization", `Bearer ${accessToken}`);
+            const {idToken} = session.tokens ?? {}; //try to use accessToken and not idToken
+            if(idToken){
+                headers.set("Authorization", `Bearer ${idToken}`);
             }
             return headers;
         }
@@ -147,6 +148,13 @@ export const api = createApi({
                     { type: "Task" as const, id: "LIST" }
                 ]
                 : [{ type: "Task" as const, id: "LIST" }],
+        }),
+        deleteProject: build.mutation<Project[], {projectId: number}> ({
+            query: ({projectId}) => ({
+                url: `api/projects/${projectId}/delete`,
+                method: "DELETE"
+            }),
+            invalidatesTags: ["Project","Task"]
         }),
         createTasks: build.mutation<Task[], Partial<Task>>({
             query: (task) => ({
@@ -210,6 +218,13 @@ export const api = createApi({
                 {type: "Teams", id: team_id},
                 {type: "Teams", id: "LIST"}
             ]  
+        }),
+        deleteTeam: build.mutation<Team[], {teamId: number}> ({
+            query: ({teamId}) => ({
+                url: `api/teams/${teamId}/delete`,
+                method: "DELETE"
+            }),
+            invalidatesTags: ["Teams"]
         }),
         createTeamProject: build.mutation<TeamProject[], {team_id: number; project_id: number}>({
             query: ({team_id, project_id}) => ({
@@ -279,6 +294,7 @@ export const {
     useGetAuthUserQuery,
     useGetProjectsQuery,
     useCreateProjectsMutation,
+    useDeleteProjectMutation,
     useGetTasksQuery,
     useCreateTasksMutation,
     useUpdateTaskStatusMutation,
@@ -288,6 +304,7 @@ export const {
     useGetTeamsQuery,
     useCreateTeamsMutation,
     useAddTeamMembersMutation,
+    useDeleteTeamMutation,
     useCreateTeamProjectMutation,
     useGetTeamProjectQuery,
     useRemoveTeamProjectMutation,

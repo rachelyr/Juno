@@ -1,16 +1,18 @@
-import Header from '@/components/Header';
-import React from 'react'
+'use client';
 
+import Header from '@/components/Header';
+import { useGetAuthUserQuery } from '@/state/api';
+import React from 'react'
 
 //needs changing upon login/logout setup
 
-const settings = () => {
+const Settings = () => {
     const userSettings = {
-        username: "rach",
-        email: "rach@gmail.com",
-        teamName: "Dvelopment Team",
+        teamName: "Development Team",
         roleName: "Developer"
     };
+
+    const {data: currentUser} = useGetAuthUserQuery({});
 
     const labelStyles = "block text-sm font-medium dark:text-white";
     const textStyles = "mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 dark:text-white"
@@ -21,11 +23,11 @@ const settings = () => {
         <div className='space-y-4'>
             <div className='pb-2'>
                 <label className={labelStyles}>Username</label>
-                <div className={textStyles}>{userSettings.username}</div>
+                <div className={textStyles}>{currentUser?.userDetails.username}</div>
             </div>
             <div className='pb-2'>
                 <label className={labelStyles}>Email</label>
-                <div className={textStyles}>{userSettings.email}</div>
+                <div className={textStyles}>{currentUser?.userDetails.email}</div>
             </div>
             <div className='pb-2'>
                 <label className={labelStyles}>Team</label>
@@ -40,4 +42,4 @@ const settings = () => {
   )
 }
 
-export default settings
+export default Settings

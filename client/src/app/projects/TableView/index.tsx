@@ -6,6 +6,7 @@ import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import { dataGridClassNames, dataGridSxStyles } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import Loader from '@/components/Loader';
+import { Clock } from 'lucide-react';
 
 type Props = {
     id: string
@@ -101,15 +102,27 @@ const Table = ({id, setIsModalNewTaskOpen}: Props) => {
             }
             isSmallText/>
         </div>
-        <div className='h-[400px] md:h-[500px] w-full'>
+        {tasks && tasks.length > 0 ? (
+            <div className='h-[400px] md:h-[500px] w-full'>
             <DataGrid
                 rows={tasks || []}
                 columns={columns}
                 className={dataGridClassNames}
                 sx={dataGridSxStyles(isDarkMode)}
             />  
-         </div>
-    </div>
+              </div>
+          ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Clock className="h-16 w-16 text-gray-400 mb-4" />
+                  <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      No Tasks Yet
+                  </h4>
+                  <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md">
+                      Start by creating Tasks to see them organised in the Table.
+                  </p>
+              </div>
+          )}
+      </div>
   )
 }
 

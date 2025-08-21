@@ -37,15 +37,17 @@ const Search = () => {
             <input 
                 type="text"
                 placeholder='Search...'
-                className='w-1/2 rounded border p-3 shadow dark:text-white'
+                className='w-full md:w-1/2 rounded border p-3 shadow dark:text-white'
                 onChange={handleSearch}
             />
         </div>
         <div className='p-5'>
             {isLoading && <Loader/>}
             {isError && <p>Error occured while fetching results</p>}
-            {searchResult?.tasks?.length == 0 && (
-                <Image src="Search-rafiki.svg" alt="" height={260} width={260} className='justify-center items-center'/>
+            {searchResult?.tasks?.length === 0 &&
+            searchResult?.projects?.length === 0 &&
+            searchResult?.users?.length === 0 && (
+                <Image src="Search-rafiki.svg" alt="" height={260} width={260} className='flex justify-center items-center'/>
             )}
             {!isLoading && !isError && searchResult && (
                 <div>

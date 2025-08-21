@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react'
 import {DisplayOption, Gantt, ViewMode} from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
 import Loader from '@/components/Loader';
+import Header from '@/components/Header';
 
 type Props = {
   id: string;
@@ -28,8 +29,13 @@ const Timeline = ({id, setIsModalNewTaskOpen}: Props) => {
 
   //each task's displayed row
   const ganttTasks = useMemo(() => { //only updates as needed
-    return(
-      tasks?.map((task) => ({
+    if(!tasks || tasks.length === 0){
+      return [];
+    }
+    return tasks.filter((task) =>{
+      return task.start_date && task.due_date;
+    })
+    .map((task) => ({
         start: new Date(task.start_date as string),
         end: new Date(task.due_date as string),
         name: task.title,
@@ -37,8 +43,7 @@ const Timeline = ({id, setIsModalNewTaskOpen}: Props) => {
         type: "task" as TaskTypeItems,
         progress: task.points ? (task.points / 10) * 100 : 0,
         isDisabled: false
-      })) || []
-    )
+    }));
   }, [tasks]);
 
   const handleViewModeChange = (
@@ -53,8 +58,48 @@ const Timeline = ({id, setIsModalNewTaskOpen}: Props) => {
   if(isLoading) return <Loader/>
   if(error) return <div>Error in getting tasks...</div>
 
+  if (!tasks || tasks.length === 0) {
+    return (
+      <div className='px-4 mt-4 xl:px-6'>
+        <header className='mb-4 flex items-center justify-between'>
+          <Header name='Tasks Timeline'/>
+          <div className='relative inline-block w-64'>
+            <select 
+              className="focus:shadow-outline block w-full appearance-none rounded border border-gray-400 bg-white px-4 py-2 pr-8 leading-tight shadow hover:border-gray-500 focus:outline-none dark:border-dark-secondary dark:bg-dark-secondary dark:text-white"
+              value={displaysOptions.viewMode}
+              onChange={handleViewModeChange}
+              disabled
+            >
+              <option value={ViewMode.Day}>Day</option>
+              <option value={ViewMode.Week}>Week</option>
+              <option value={ViewMode.Month}>Month</option>
+            </select>
+          </div>
+        </header>
+
+        <div className='overflow-hidden rounded-md bg-white shadow dark:bg-dark-secondary dark:text-white'>
+          <div className="flex flex-col items-center justify-center h-96 text-center p-8">
+            <div className="text-6xl mb-4">📊</div>
+            <h3 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
+              Welcome to Project&apos;s Task Timeline
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md">
+              You don&apos;t have any Tasks yet. Create your first Task to see it visualized in the timeline.
+            </p>
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium cursor-pointer py-2 px-4 rounded-lg transition-colors"
+              onClick={() => setIsModalNewTaskOpen(true)}
+            >
+              Create Your First Task in the Board
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className='px-4 xl:px-6'>
+    <div className='px-4 mt-4 xl:px-6'>
       <div className='flex flex-wrap items-center justify-between gap-2 py-4'>
         <h1 className='me-2 text-lg font-bold dark:text-white'>
           Project Tasks Timeline

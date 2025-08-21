@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import ModalEdit from '@/components/ModalEdit';
-import { Priority, Status, Task, useUpdateTaskMutation } from '@/state/api';
+import { Priority, Status, Task, useGetAuthUserQuery, useUpdateTaskMutation } from '@/state/api';
 import { Calendar, Check, Edit3, Flag, User, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import ModalComment from '../ModalComment';
@@ -137,6 +137,9 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
         due_date: task?.due_date || '',
         assigned_userid: task?.assigned_userid || 0
     });
+
+    const {data: currentUser} = useGetAuthUserQuery({});
+    const currUserId = currentUser?.userDetails?.id ?? 0;
 
     const [editingField, setEditingField] = useState<keyof TaskEditState | null>(null);
     const [tempValue, setTempValue] = useState<string>('');
@@ -430,7 +433,7 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
         <div className="w-80 border-l pl-6">
           <ModalComment
             taskId={task?.id || 0} 
-            userId={taskData.assigned_userid || 1} // will change that
+            userId={currUserId} // will change that
           />
         </div>
     </div>

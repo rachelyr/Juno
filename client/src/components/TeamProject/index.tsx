@@ -46,7 +46,6 @@ const TeamProject: React.FC<TeamProjectProps> = ({
             await createTeamProject({ team_id: team.id, project_id: projectId }).unwrap();
             setIsDropdownOpen(false);
             onProjectAssigned?.(team.id, projectId);
-            console.log('Project added to team successfully');
         } catch (error) {
             console.error('Failed to add project to team:', error);
         }

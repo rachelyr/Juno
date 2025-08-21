@@ -84,7 +84,7 @@ const ModalComment = ({taskId, userId}: Props) => {
               <div className='flex justify-between items-start mb-1'>
                 <span className='font-medium text-sm dark:text-white'>{comment.username}</span>
                 <div className='flex items-center space-x-2'>
-                  {comment.user_id === userId && (
+                  {comment.user_id && (
                     <button
                       onClick={() => handleDelete(comment.id)}
                       className='text-red-600 hover:text-red-800 text-xs cursor-pointer'

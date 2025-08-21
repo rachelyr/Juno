@@ -212,7 +212,7 @@ const Task = ({task, onEditTask}: TaskProps) => {
           <div className='flex -space-x-[6px] overflow-hidden'>
             {task.assigned && (
               <Image 
-                key={task.assigned.id}
+                key={task.id}
                 src={`/${task.assigned.profilepicture_id}`}
                 alt={task.assigned.username}
                 width={30}

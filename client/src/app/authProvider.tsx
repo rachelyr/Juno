@@ -1,7 +1,11 @@
-import React from 'react'
+import React, { useEffect, useRef} from 'react'
 import {Authenticator} from "@aws-amplify/ui-react";
 import { Amplify } from 'aws-amplify';
 import "@aws-amplify/ui-react/styles.css";
+import { api } from '@/state/api';
+import { useDispatch } from 'react-redux';
+import { Hub } from 'aws-amplify/utils';
+import { useRouter } from 'next/navigation';
 
 Amplify.configure({
     Auth: {
@@ -45,8 +49,44 @@ const formFields = {
 }
 
 const AuthProvider = ({children} : any) => {
+
+    const dispatch = useDispatch();
+    const router = useRouter();
+    const previousUserRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        const hubListener = Hub.listen('auth', ({ payload }) => {
+            const {event, data} = payload as {event: string; data?: any};
+            switch (event) {
+                case 'signedIn':
+                    const currentUser = data?.username;
+
+                    if(previousUserRef.current && previousUserRef.current !== currentUser){
+                        dispatch(api.util.resetApiState());
+                        sessionStorage.clear();
+                        setTimeout(() => {
+                            window.location.href = '/home';
+                        }, 50);
+                    } else{
+                        dispatch(api.util.resetApiState());
+                        router.push('/home')
+                    }
+
+                    previousUserRef.current = currentUser;
+                    break;
+
+                case 'signedOut':
+                    previousUserRef.current = null;
+                    dispatch(api.util.resetApiState());
+                    sessionStorage.clear();
+                    break;
+            }
+        });
+        return () => hubListener();
+    }, [dispatch, router]);
+
   return (
-    <div className='mt-4'>
+    <div className='mt-2'>
         <Authenticator formFields={formFields}>
             {({user}: any) => 
             user ? (
