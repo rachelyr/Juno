@@ -120,7 +120,6 @@ const ModalNewTeam = ({isOpen, onClose}: Props) => {
                       placeholder="Enter username"
                       value={memberInput}
                       onChange={handleInputChange}
-                    //   onKeyPress={handleMemberKeyPress}
                   />
                   {memberInput && userSuggestions.length > 0 && (
                     <ul className='absolute z-10 w-full mt-1 bg-white dark:bg-dark-teritary border rounded shadow max-h-40 overflow-auto'>

@@ -12,7 +12,7 @@ export interface Project{
 
 export enum Status{
     ToDo = "To Do",
-    WorkInProgess = "Work In Progress",
+    WorkInProgress = "Work In Progress",
     UnderReview = "Under Review",
     Completed = "Completed"
 }
@@ -192,13 +192,27 @@ export const api = createApi({
                 ? result.map(({id}) => ({type: "Task", id}))
                 : [{type: "Task", id: id}] //problem  tag name mismatch Tasks instead of Task written
         }),
+        deleteTask: build.mutation<Task[], {taskId: number}> ({
+            query: ({taskId}) => ({
+                url: `api/tasks/${taskId}/delete`,
+                method: "DELETE"
+            }),
+            invalidatesTags: (result, error, {taskId}) =>[
+                {type: "Task", id: taskId},
+                {type: "Task", id: "LIST"}
+            ]
+        }),
         getUsers: build.query<User[], void>({
             query: () => "api/users/",
             providesTags: ["Users"]
         }),
         getTeams: build.query<Team[], void>({
             query: () => "api/teams/",
-            providesTags: ["Teams"]
+            providesTags: (result) =>
+                result ? [
+                    ...result.map(({id}) => ({type: "Teams" as const, id})),
+                    {type: "Teams", id: "LIST"}
+                ] : [{type: "Teams", id: "LIST"}]
         }),
         createTeams: build.mutation<Team[], Partial<Team>>({
             query: (team) => ({
@@ -206,7 +220,7 @@ export const api = createApi({
                 method: "POST",
                 body: team
             }),
-            invalidatesTags: ["Teams"]
+            invalidatesTags: [{type:"Teams", id: "LIST"}]
         }),
         addTeamMembers: build.mutation<Team, {members: string[]; team_id: number}>({
             query: ({members, team_id}) => ({
@@ -263,14 +277,19 @@ export const api = createApi({
                 body: data
             }),
             invalidatesTags: (result, error, { task_id }) => [
-                { type: "Comments", id: task_id }
+                { type: "Comments", id: "LIST" },
+                { type: "Task", id: task_id },
+                { type: "Task", id: "LIST" }
             ],
         }),
         getComments: build.query<Comment[], {task_id: number}>({
             query: ({ task_id }) => `api/tasks/${task_id}/comments/`,
-            providesTags: (result, error, { task_id }) => [
-                { type: "Comments", id: task_id }
-            ],
+            providesTags: (result, error, { task_id }) => result
+            ? [
+                ...result.map(({id}) => ({type: "Comments" as const, id})),
+                {type: "Comments", id: task_id},
+                {type: "Comments", id: "LIST"},
+            ] : [{type: "Comments", id: task_id}, {type: "Comments", id: "LIST"}],
         }),
         deleteComment: build.mutation<void, {task_id:number; comm_id: number}>({
             query: ({task_id, comm_id}) => ({
@@ -278,7 +297,9 @@ export const api = createApi({
                 method: "DELETE"
             }),
             invalidatesTags: (result, error, {task_id}) => [
-                {type: "Comments", id: task_id}
+                {type: "Comments", id: "LIST"},
+                {type: "Task", id: "LIST"},
+                {type: "Task", id: task_id}
             ]
         }),
         search: build.query<SearchResult, string>({
@@ -299,6 +320,7 @@ export const {
     useCreateTasksMutation,
     useUpdateTaskStatusMutation,
     useUpdateTaskMutation,
+    useDeleteTaskMutation,
     useGetUsersQuery,
     useSearchQuery,
     useGetTeamsQuery,

@@ -16,7 +16,7 @@ type BoardProps = {
 
 const taskStatus: Status[] = [
   Status.ToDo,
-  Status.WorkInProgess,
+  Status.WorkInProgress,
   Status.UnderReview,
   Status.Completed
 ];

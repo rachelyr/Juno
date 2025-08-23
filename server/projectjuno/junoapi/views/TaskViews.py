@@ -43,3 +43,9 @@ class UpdateTaskView(generics.RetrieveUpdateAPIView):
     def get_queryset(self):
         project_id = self.request.query_params.get('project_id')
         return Task.objects.filter(project_id=project_id)
+    
+
+class DeleteTaskView(generics.DestroyAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]

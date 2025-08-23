@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ModalEdit from '@/components/ModalEdit';
-import { Priority, Status, Task, useGetAuthUserQuery, useUpdateTaskMutation } from '@/state/api';
-import { Calendar, Check, Edit3, Flag, User, X } from 'lucide-react';
+import { Priority, Status, Task, useDeleteTaskMutation, useGetAuthUserQuery, useUpdateTaskMutation } from '@/state/api';
+import { Calendar, Check, Edit3, Flag, Trash2, User, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import ModalComment from '../ModalComment';
 
@@ -10,7 +10,7 @@ type Props = {
     projectid: string;
     isOpen: boolean;
     onClose: () => void;
-    task: Task; //may need change
+    task: Task;
 }
 
 interface SelectOption {
@@ -128,6 +128,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
 const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
     //get the update API here
     const [updateTask, {isLoading}] = useUpdateTaskMutation();
+    const [deleteTask, {isLoading: isDeleting}] = useDeleteTaskMutation();
 
     const [taskData, setTaskData] = useState<TaskEditState>({
         title: task?.title || '',
@@ -143,10 +144,11 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
 
     const [editingField, setEditingField] = useState<keyof TaskEditState | null>(null);
     const [tempValue, setTempValue] = useState<string>('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
 
     // Update state when task prop changes
     useEffect(() => {
-        if (task && editingField === null) {
+        if (task) {
             setTaskData({
                 title: task.title || '',
                 description: task.description || '',
@@ -156,11 +158,13 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
                 assigned_userid: task.assigned_userid || 0
             });
         }
-    }, [task, editingField]);
+    }, [task]);
 
     const handleFieldClick = (field: keyof TaskEditState): void => {
         setEditingField(field);
-        setTempValue(taskData[field].toString());
+        
+        const currVal = taskData[field];
+        setTempValue(currVal?.toString() || '');
     };
 
     const handleSave = async (field: keyof TaskEditState, value: string): Promise<void> => {
@@ -194,12 +198,24 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
                         assigned_userid: updatedData.assigned_userid
                     },
                     project_id: Number(projectid)
-                });
+                }).unwrap();
             } catch (error) {
                 console.error('Failed to update task:', error);
             }
         }
     };
+
+    const handleDeleteTask = async () : Promise<void> => {
+        if(task?.id){
+            try{
+                await deleteTask({taskId: task.id}).unwrap();
+                onClose();
+            } catch(error){
+                console.log("error deleting task: ",error);
+            }
+        }
+        setShowDeleteConfirm(false);
+    }
 
     const formatDateForInput = (dateString: string) => {
         if (!dateString) return '';
@@ -420,6 +436,40 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
                             onStartEditing={handleFieldClick}
                         />
                     </div>
+                          {showDeleteConfirm && (
+                              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                                  <p className="text-red-800 dark:text-red-300 text-sm mb-3">
+                                      Delete &apos;{task?.title}&apos; ?
+                                  </p>
+                                  <div className="flex gap-2">
+                                      <button
+                                          onClick={handleDeleteTask}
+                                          disabled={isDeleting}
+                                          className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                                      >
+                                          {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+                                      </button>
+                                      <button
+                                          onClick={() => setShowDeleteConfirm(false)}
+                                          className="px-3 py-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded hover:bg-gray-400 dark:hover:bg-gray-500"
+                                      >
+                                          Cancel
+                                      </button>
+                                  </div>
+                              </div>
+                          )}
+
+                          {!showDeleteConfirm && (
+                            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                <button
+                                  onClick={() => setShowDeleteConfirm(true)}
+                                  className="flex items-center gap-2 px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                >
+                                  <Trash2 size={16} />
+                                  Delete Task
+                              </button>
+                          </div>
+                        )}
 
                     {/* Loading indicator */}
                     {isLoading && (

@@ -66,7 +66,7 @@ const AuthProvider = ({children} : any) => {
                         sessionStorage.clear();
                         setTimeout(() => {
                             window.location.href = '/home';
-                        }, 50);
+                        }, 20);
                     } else{
                         dispatch(api.util.resetApiState());
                         router.push('/home')

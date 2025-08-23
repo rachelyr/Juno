@@ -22,7 +22,7 @@ class ListCreateTeamView(generics.ListCreateAPIView):
         user = self.request.user
         return Team.objects.filter(
             Q(productowner_userid=user) |
-            Q(productowner_userid=user) |
+            Q(projectmanager_userid=user) |
             Q(members=user)
             ).distinct()
 

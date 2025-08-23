@@ -35,15 +35,14 @@ const Teams = () => {
       if (!currentUser) return false;
       const userId = currentUser.userDetails.id;
       return (
-        userId === team.productowner_userid ||
-        userId === team.projectmanager_userid
+        userId === team.productowner_userid
       );
     };
 
     const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
     const handleProjectAssigned = () => {
-        // You could show a toast notification here
+        //could show a toast notification here
     };
 
     const handleDelete = () => {
