@@ -1,4 +1,4 @@
-import { Team, useCreateTeamProjectMutation, useGetProjectsQuery, useGetTeamProjectQuery, useRemoveTeamProjectMutation } from '@/state/api'
+import { Team, useCreateTeamProjectMutation, useGetTeamProjectQuery, useGetUserOwnedProjectsQuery, useRemoveTeamProjectMutation } from '@/state/api'
 import { ChevronDown, PlusSquareIcon, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react'
 
@@ -14,7 +14,7 @@ const TeamProject: React.FC<TeamProjectProps> = ({
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     
-    const {data: projects, isLoading} = useGetProjectsQuery();
+    const {data: projects, isLoading} = useGetUserOwnedProjectsQuery();
     const {data: teamProjects} = useGetTeamProjectQuery();
     const [createTeamProject] = useCreateTeamProjectMutation();
     const [removeTeamProject] = useRemoveTeamProjectMutation();
@@ -131,7 +131,7 @@ const TeamProject: React.FC<TeamProjectProps> = ({
                         </div>
                     ) : !projects || projects.length === 0 ? (
                         <div className='p-3 text-center text-gray-500 dark:text-gray-400 text-sm'>
-                            No projects available
+                            No projects created by you
                         </div>
                     ) : (
                         <>

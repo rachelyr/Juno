@@ -26,7 +26,7 @@ export enum Priority{
 }
 
 export interface User{
-    id?: number;
+    id: number;
     username: string;
     email: string;
     profilepicture_id?: string;
@@ -131,6 +131,10 @@ export const api = createApi({
         getProjects: build.query<Project[], void>({
             query: () => "api/projects/",  //short hand notation
             providesTags: ["Project"],
+        }),
+        getUserOwnedProjects: build.query<Project[], void>({
+            query: () => 'api/projects/user/',
+            providesTags: ['Project']
         }),
         createProjects: build.mutation<Project[], Partial<Project>>({ //mutation is used to create
             query: (project) => ({  //this isnt short hand 
@@ -314,6 +318,7 @@ export const api = createApi({
 export const {
     useGetAuthUserQuery,
     useGetProjectsQuery,
+    useGetUserOwnedProjectsQuery,
     useCreateProjectsMutation,
     useDeleteProjectMutation,
     useGetTasksQuery,

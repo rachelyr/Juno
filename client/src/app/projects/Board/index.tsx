@@ -74,10 +74,10 @@ const TaskColumn = ({status, tasks, moveTask, setIsModalNewTaskOpen, onEditTask 
   const taskCount = tasks.filter((task) => task.status === status).length;
 
   const statusColor: Record<Status, string>= {
-    "To Do": "#2563EB",
-    "Work In Progress": "#059669",
-    "Under Review": "#D97706",
-    "Completed": "#000000"
+    "To Do": "bg-blue-200",
+    "Work In Progress": "bg-yellow-200",
+    "Under Review": "bg-purple-200",
+    "Completed": "bg-green-200"
   }
 
   return (
@@ -88,8 +88,7 @@ const TaskColumn = ({status, tasks, moveTask, setIsModalNewTaskOpen, onEditTask 
     className={`sl:py-4 rounded-lg py-2 xl:px-2 ${isOver ? "bg-blue-100 dark:bg-neutral-950" : "" }`}>
       <div className='mb-3 flex w-full'>
         <div
-          className="w-2 rounded-s-lg"
-          style={{backgroundColor: statusColor[status]}}
+          className= {`w-2 rounded-s-lg ${statusColor[status]}`}
         />
         <div className='flex w-full items-center justify-between rounded-e-lg bg-white px-5 py-4 dark:bg-dark-secondary'>
           <h3 className='flex items-center text-lg font-semibold dark:text-white'>
@@ -144,9 +143,9 @@ const Task = ({task, onEditTask}: TaskProps) => {
     <div
       className={`rounded-full px-2 py-1 text-xs font-semibold ${
         priority === "Urgent" ? "bg-red-200 text-red-700": priority === "High" ?
-        "bg-yellow-200 text-yellow-700" : priority === "Medium" ?
-        "bg-green-200 text-green-700" : priority === 'Low' ? 
-        "bg-blue-200 text-blue-700" :
+        "bg-orange-200 text-yellow-700" : priority === "Medium" ?
+        "bg-blue-200 text-blue-700" : priority === 'Low' ? 
+        "bg-green-200 text-green-700" :
         "bg-gray-200 text-gray-700" 
       }`}>
         {priority}

@@ -38,6 +38,7 @@ class AttachmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['task_id','uploadedby_id']
     
 class ProjectSerializer(serializers.ModelSerializer):
+    owner_id = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Project
         fields = ['id','name','description','start_date','due_date','owner_id']

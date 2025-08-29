@@ -2,7 +2,7 @@ import Modal from '@/components/Modal';
 import { useCreateTeamsMutation, useSearchUsersQuery } from '@/state/api';
 import { debounce } from 'lodash';
 import { X } from 'lucide-react';
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 type Props = {
     isOpen: boolean;
@@ -19,17 +19,58 @@ const ModalNewTeam = ({isOpen, onClose}: Props) => {
     const userSuggestions = data?.users ?? [];
     const [teamName, setTeamName] = useState("");
     const [productOwner, setProductOwner] = useState<string>("");
+    const [productOwnerInput, setProductOwnerInput] = useState<string>("");
     const [projectManager, setProjectManager] = useState<string>("");
+    const [projectManagerInput, setProjectManagerInput] = useState<string>("");
     const [members, setMembers] = useState<string[]>([]);
     const [memberInput, setMemberInput] = useState<string>("");
 
-    const debounceSearch = debounce((value: string) => {
-        setSearchQuery(value);
-    }, 300);
+    const [activeField, setActiveField] = useState<'productOwner' | 'projectManager' | 'member' | null>(null);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const debounceSearch = useMemo(
+        () => debounce((value: string) => {
+            setSearchQuery(value);
+        }, 300),
+        []
+    );
+
+    // Product Owner handlers
+    const handleProductOwnerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setProductOwnerInput(value);
+        setProductOwner(""); // Clear selection when typing
+        setActiveField('productOwner');
+        debounceSearch(value);
+    };
+
+    const handleSelectProductOwner = (user: any) => {
+        setProductOwner(user.id.toString());
+        setProductOwnerInput(user.username);
+        setSearchQuery("");
+        setActiveField(null);
+    };
+
+    // Project Manager handlers
+    const handleProjectManagerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setProjectManagerInput(value);
+        setProjectManager(""); // Clear selection when typing
+        setActiveField('projectManager');
+        debounceSearch(value);
+    };
+
+    const handleSelectProjectManager = (user: any) => {
+        setProjectManager(user.id.toString());
+        setProjectManagerInput(user.username);
+        setSearchQuery("");
+        setActiveField(null);
+    };
+
+    // Member handlers
+    const handleMemberInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setMemberInput(value);
+        setActiveField('member');
         debounceSearch(value);
     };
 
@@ -39,6 +80,7 @@ const ModalNewTeam = ({isOpen, onClose}: Props) => {
         }
         setMemberInput("");
         setSearchQuery("");
+        setActiveField(null);
     };
 
     const addMember = () => {
@@ -62,6 +104,16 @@ const ModalNewTeam = ({isOpen, onClose}: Props) => {
             projectmanager_userid: projectManager ? Number(projectManager) : undefined,
             members: members 
         });
+
+        setTeamName("");
+        setProductOwner("");
+        setProductOwnerInput("");
+        setProjectManager("");
+        setProjectManagerInput("");
+        setMembers([]);
+        setMemberInput("");
+        setSearchQuery("");
+        setActiveField(null);
         onClose();
     };
 
@@ -89,23 +141,53 @@ const ModalNewTeam = ({isOpen, onClose}: Props) => {
         <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-2'>
             <div className='space-y-2'>
                 <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>Team Project Owner</label>
-                <input
-                    type="number"
-                    className={inputStyles}
-                    placeholder='Project Owner ID'
-                    value={productOwner}
-                    onChange={(e) => setProductOwner(e.target.value)}
-                />
+                <div className='relative'>
+                    <input
+                        type="text"
+                        className={inputStyles}
+                        placeholder='Project Owner Username'
+                        value={productOwnerInput}
+                        onChange={handleProductOwnerInputChange}
+                    />
+                    {searchQuery && userSuggestions.length > 0 && activeField === 'productOwner' && (
+                        <ul className="absolute z-10 w-full mt-1 bg-white dark:bg-dark-teritary border rounded shadow max-h-40 overflow-auto">
+                            {userSuggestions.map((user) => (
+                                <li
+                                key={user.id}
+                                onClick={() => handleSelectProductOwner(user)}
+                            className="px-4 py-2 cursor-pointer dark:text-white hover:bg-gray-100 dark:hover:bg-dark-secondary"
+                            >
+                                {user.username}
+                            </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
             </div>
             <div className='space-y-2'>
                 <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>Team Project Manager</label>
-                <input
-                    type="number"
-                    className={inputStyles}
-                    placeholder='Project Manager ID'
-                    value={projectManager}
-                    onChange={(e) => setProjectManager(e.target.value)}
-                />
+                <div className='relative'>
+                    <input
+                      type="text"
+                      className={inputStyles}
+                      placeholder='Project Manager Username'
+                      value={projectManagerInput}
+                      onChange={handleProjectManagerInputChange}
+                    />
+                    {searchQuery && userSuggestions.length > 0 && activeField === 'projectManager' && (
+                        <ul className='absolute z-10 w-full mt-1 bg-white dark:bg-dark-teritary border rounded shadow max-h-40 overflow-auto'>
+                            {userSuggestions.map((user) => (
+                                <li 
+                                  className='px-4 py-2 cursor-pointer dark:text-white hover:bg-gray-100 dark:hover:bg-dark-secondary'
+                                  key={user.id}
+                                  onClick={() => handleSelectProjectManager(user)}  
+                                >
+                                    {user.username}
+                                </li>
+                            ))}
+                        </ul> 
+                    )}
+                </div>
             </div>
         </div>
         <div className="space-y-2">
@@ -119,15 +201,15 @@ const ModalNewTeam = ({isOpen, onClose}: Props) => {
                       className={`${inputStyles} flex-1`}
                       placeholder="Enter username"
                       value={memberInput}
-                      onChange={handleInputChange}
+                      onChange={handleMemberInputChange}
                   />
-                  {memberInput && userSuggestions.length > 0 && (
+                  {memberInput && userSuggestions.length > 0 && activeField === 'member' && (
                     <ul className='absolute z-10 w-full mt-1 bg-white dark:bg-dark-teritary border rounded shadow max-h-40 overflow-auto'>
                         {userSuggestions.map((user) => (
                             <li
                             key={user.id}
                             onClick={() => handleSelectUser(user.username)}
-                            className='px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-secondary'
+                            className='px-4 py-2 cursor-pointer dark:text-white hover:bg-gray-100 dark:hover:bg-dark-secondary'
                             >
                                 {user.username}
                             </li>

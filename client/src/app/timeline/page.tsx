@@ -18,7 +18,6 @@ const Timeline = () => {
 
   const {
     data: projects,
-    isError,
     isLoading
   } = useGetProjectsQuery();
 
@@ -54,9 +53,9 @@ const Timeline = () => {
         border: `2px solid ${borderColor}`,
         borderRadius: '6px',
         color: 'white',
-        fontSize: '12px',
+        fontSize: '11px',
         fontWeight: '500',
-        padding: '2px 6px',
+        padding: '1px 4px',
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
       }
     };
@@ -65,14 +64,14 @@ const Timeline = () => {
   const CustomToolbar = ({ label, onNavigate, onView, view: currentView }: any) => {
     return (
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 justify-center sm:justify-start">
           <button
             onClick={() => onNavigate('PREV')}
             className="px-3 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded text-sm font-medium transition-colors"
           >
             ←
           </button>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white min-w-[200px] text-center">
+          <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white min-w-[160px] sm:min-w-[200px] text-center">
             {label}
           </h2>
           <button
@@ -89,7 +88,7 @@ const Timeline = () => {
           </button>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
           {[
             { view: Views.MONTH, label: 'Month' },
             { view: Views.WEEK, label: 'Week' },
@@ -119,23 +118,6 @@ const Timeline = () => {
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           <span className="ml-3 text-lg">Loading your projects...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className='px-4 xl:px-6'>
-        <Header name='Project Timeline'/>
-        <div className="flex flex-col items-center justify-center h-64 text-center">
-          <div className="text-red-500 text-xl mb-2">⚠️</div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
-            Error Loading Projects
-          </h3>
-          <p className="text-gray-600 dark:text-gray-300">
-            We couldn&apos;t load your projects. Please try refreshing the page.
-          </p>
         </div>
       </div>
     );
@@ -173,11 +155,11 @@ const Timeline = () => {
   }
 
   return (
-    <div className='px-4 pt-4 xl:px-6'>
+    <div className='px-2 pt-4 md:px-4 xl:px-6'>
       <Header name='Project Timeline'/>
       
       <div className='overflow-hidden rounded-lg bg-white shadow dark:bg-dark-secondary mt-4'>
-        <div className="p-4">
+        <div className="p-2 md:p-4">
           <Calendar
             localizer={localizer}
             events={events}
@@ -186,7 +168,7 @@ const Timeline = () => {
             view={view}
             onView={handleViewChange}
             style={{ 
-              height: 600,
+              height: window.innerWidth < 768 ? 400 : window.innerWidth < 1024 ? 500 : 600,
               backgroundColor: isDarkMode ? '#1f2937' : 'white',
               color: isDarkMode ? 'white' : 'black'
             }}
@@ -195,10 +177,10 @@ const Timeline = () => {
               toolbar: CustomToolbar
             }}
             formats={{
-              dayFormat: 'ddd DD',
-              weekdayFormat: 'dddd',
-              monthHeaderFormat: 'MMMM YYYY',
-              dayHeaderFormat: 'dddd, MMMM DD',
+              dayFormat: window.innerWidth < 768 ? 'DD' : 'ddd DD',
+              weekdayFormat: window.innerWidth < 768 ? 'ddd' : 'dddd',
+              monthHeaderFormat: window.innerWidth < 768 ? 'MMM YYYY' : 'MMMM YYYY',
+              dayHeaderFormat: window.innerWidth < 768 ? 'ddd, MMM DD' : 'dddd, MMMM DD',
               agendaDateFormat: 'ddd MMM DD',
               agendaTimeFormat: ''
             }}
@@ -208,11 +190,15 @@ const Timeline = () => {
               time: 'Duration',
               event: 'Project',
               noEventsInRange: 'No projects scheduled for this period.',
-              showMore: (total) => `+${total} more projects`
+              showMore: (total) => `+${total} more`
             }}
             popup
             popupOffset={{ x: 30, y: 20 }}
-            className={`${isDarkMode ? 'dark-calendar' : ''}`}
+            className={`${isDarkMode ? 'dark-calendar' : ''} responsive-calendar`}
+            step={60}
+            timeslots={1}
+            min={new Date(2024, 0, 1, 8, 0)}
+            max={new Date(2024, 0, 1, 18, 0)}
           />
         </div>
       </div>
@@ -274,6 +260,76 @@ const Timeline = () => {
         .rbc-btn-group > button.rbc-active {
           background-color: #3b82f6 !important;
           color: white !important;
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+          .responsive-calendar .rbc-toolbar {
+            font-size: 12px;
+          }
+          
+          .responsive-calendar .rbc-header {
+            font-size: 11px;
+            padding: 8px 4px;
+          }
+          
+          .responsive-calendar .rbc-date-cell {
+            font-size: 12px;
+            padding: 2px;
+          }
+          
+          .responsive-calendar .rbc-event {
+            font-size: 10px;
+            padding: 1px 2px;
+          }
+          
+          .responsive-calendar .rbc-month-view {
+            font-size: 11px;
+          }
+          
+          .responsive-calendar .rbc-time-view .rbc-time-header-content {
+            font-size: 11px;
+          }
+          
+          .responsive-calendar .rbc-agenda-view .rbc-agenda-table {
+            font-size: 12px;
+          }
+          
+          .responsive-calendar .rbc-show-more {
+            font-size: 10px;
+          }
+          
+          .responsive-calendar .rbc-month-row + .rbc-month-row {
+            border-top-width: 1px;
+          }
+        }
+
+        /* Tablet-specific styles */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .responsive-calendar .rbc-header {
+            font-size: 12px;
+            padding: 10px 6px;
+          }
+          
+          .responsive-calendar .rbc-event {
+            font-size: 11px;
+            padding: 2px 4px;
+          }
+        }
+
+        /* Improve touch targets on mobile */
+        @media (max-width: 768px) {
+          .responsive-calendar .rbc-date-cell a {
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          
+          .responsive-calendar .rbc-event {
+            min-height: 20px;
+            cursor: pointer;
+          }
         }
       `}</style>
     </div>

@@ -39,6 +39,14 @@ const Teams = () => {
       );
     };
 
+    const canManageUsers = (team: any) => {
+      if(!currentUser) return false;
+      const userId = currentUser.userDetails.id;
+      return(
+        userId === team.productowner_userid || userId === team.projectmanager_userid
+      );
+    };
+
     const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
     const handleProjectAssigned = () => {
@@ -135,7 +143,7 @@ const Teams = () => {
               <div className='flex items-center gap-2'>
 
                 <button
-                  onClick={canManageTeam(team) ? () => {
+                  onClick={canManageUsers(team) ? () => {
                     setIsModalAddMemOpen(true);
                     setSelectedTeamId(team.id)
                   } : () => handleRestrictedAction(team)}

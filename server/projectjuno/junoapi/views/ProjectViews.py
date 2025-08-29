@@ -31,6 +31,16 @@ class ProjectView(generics.ListCreateAPIView):
             Q(id__in=team_project)
         ).distinct()
     
+class GetUserOwnedProjects(generics.ListAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        return Project.objects.filter(owner_id=user)
+
 class DeleteProject(generics.DestroyAPIView):
     queryset = Project.objects.all()
     serializer_class= ProjectSerializer

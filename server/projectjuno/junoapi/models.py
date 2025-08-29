@@ -7,8 +7,7 @@ class Team(models.Model):
     domain_name = models.CharField(max_length=100)
     productowner_userid = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
+        on_delete=models.CASCADE,
         related_name= 'team_product_owner'
     )
     projectmanager_userid = models.ForeignKey(
@@ -41,7 +40,7 @@ class Project(models.Model):
     description = models.CharField(max_length=250)
     start_date = models.DateTimeField()
     due_date = models.DateTimeField()
-    owner_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='project_owner')
+    owner_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_owner')
 
     class Meta:
         db_table = 'project'
@@ -89,7 +88,7 @@ class Attachment(models.Model):
     file_url = models.URLField(max_length = 2048)
     file_name = models.CharField(max_length = 150)
     task_id = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="attachment")
-    uploadedby_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    uploadedby_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         db_table = 'attachment'
@@ -100,7 +99,7 @@ class Attachment(models.Model):
 class Comment(models.Model):
     text = models.CharField(max_length=150)
     task_id = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comment')
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_comments')
 
     class Meta:
         db_table = 'comment'

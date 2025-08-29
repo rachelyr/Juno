@@ -90,7 +90,7 @@ const Timeline = ({id, setIsModalNewTaskOpen}: Props) => {
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium cursor-pointer py-2 px-4 rounded-lg transition-colors"
               onClick={() => setIsModalNewTaskOpen(true)}
             >
-              Create Your First Task in the Board
+              Create Your First Task
             </button>
           </div>
         </div>

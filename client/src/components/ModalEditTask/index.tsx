@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import ModalEdit from '@/components/ModalEdit';
-import { Priority, Status, Task, useDeleteTaskMutation, useGetAuthUserQuery, useUpdateTaskMutation } from '@/state/api';
+import { Priority, Status, Task, useDeleteTaskMutation, useGetAuthUserQuery, useSearchUsersQuery, useUpdateTaskMutation } from '@/state/api';
 import { Calendar, Check, Edit3, Flag, Trash2, User, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import ModalComment from '../ModalComment';
-
+import { debounce } from 'lodash';
 
 type Props = {
     projectid: string;
@@ -30,7 +30,7 @@ interface TaskEditState {
 interface EditableFieldProps {
   field: keyof TaskEditState;
   value: string;
-  type?: 'text' | 'textarea' | 'date' | 'select' | 'number';
+  type?: 'text' | 'textarea' | 'date' | 'select' | 'user-search';
   options?: SelectOption[];
   onSave: (field: keyof TaskEditState, value: string) => void;
   isEditing: boolean;
@@ -40,13 +40,16 @@ interface EditableFieldProps {
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof TaskEditState) => void;
   isLoading: boolean;
   onStartEditing: (field: keyof TaskEditState) => void;
+  userSuggestions?: any[];
+  onUserSelect?: (user: any) => void;
+  userSearchQuery?: string;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
     field,
     value,
     type = 'text',
-    options = null,
+    options = [],
     onSave,
     isEditing,
     tempValue,
@@ -54,17 +57,21 @@ const EditableField: React.FC<EditableFieldProps> = ({
     onCancel,
     onKeyDown,
     isLoading,
-    onStartEditing
+    onStartEditing,
+    userSuggestions = [],
+    onUserSelect,
+    userSearchQuery = ""
 }) => {
 
     if (isEditing) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="relative">
+        <div className="flex items-center gap-2">
         {type === 'select' ? (
           <select
             value={tempValue}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onTempValueChange(e.target.value)}
-            className="flex-1 px-3 py-2 border dark:text-white border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-3 py-2 border dark:bg-dark-secondary dark:text-white border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           >
             {options?.map(option => (
@@ -78,8 +85,18 @@ const EditableField: React.FC<EditableFieldProps> = ({
             value={tempValue}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onTempValueChange(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => onKeyDown(e, field)}
-            className="flex-1 px-3 py-2 border dark:text-white border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="flex-1 px-3 py-2 border dark:text-white dark:bg-dark-secondary border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             rows={3}
+            autoFocus
+          />
+        ) : type === 'user-search' ? (
+          <input
+            type="text"
+            value={tempValue}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onTempValueChange(e.target.value)}
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => onKeyDown(e, field)}
+            className="flex-1 px-3 py-2 dark:text-white dark:bg-dark-secondary border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Search for user..."
             autoFocus
           />
         ) : (
@@ -88,7 +105,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
             value={tempValue}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => onTempValueChange(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => onKeyDown(e, field)}
-            className="flex-1 px-3 py-2 dark:text-white border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-3 py-2 dark:text-white dark:bg-dark-secondary border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
         )}
@@ -108,8 +125,25 @@ const EditableField: React.FC<EditableFieldProps> = ({
           <X size={16} />
         </button>
       </div>
+      
+      {/* User suggestions dropdown */}
+      {type === 'user-search' && userSearchQuery && userSuggestions.length > 0 && (
+        <div className="absolute left-0 right-0 z-20 mt-1 max-h-40 overflow-auto rounded-md border border-gray-300 bg-white shadow-lg dark:border-dark-teritary dark:bg-dark-teritary">
+          {userSuggestions.map((user) => (
+            <div
+              key={user.id}
+              className="px-4 py-2 cursor-pointer dark:text-white hover:bg-gray-100 dark:hover:bg-dark-secondary"
+              onClick={() => onUserSelect?.(user)}
+            >
+              {user.username}
+            </div>
+          ))}
+        </div>
+      )}
+      </div>
     );
   }
+
   return (
     <div
       onClick={() => onStartEditing(field)}
@@ -126,9 +160,18 @@ const EditableField: React.FC<EditableFieldProps> = ({
 };
 
 const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
-    //get the update API here
     const [updateTask, {isLoading}] = useUpdateTaskMutation();
     const [deleteTask, {isLoading: isDeleting}] = useDeleteTaskMutation();
+
+    const [userSearchQuery, setUserSearchQuery] = useState("");
+    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+    const [assignedUserDisplay, setAssignedUserDisplay] = useState<string>('');
+
+    const {data} = useSearchUsersQuery(userSearchQuery, {
+        skip: userSearchQuery.length < 1
+    });
+
+    const userSuggestions = data?.users ?? [];
 
     const [taskData, setTaskData] = useState<TaskEditState>({
         title: task?.title || '',
@@ -146,6 +189,13 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
     const [tempValue, setTempValue] = useState<string>('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
 
+    const debounceSearch = useMemo(() => 
+        debounce((value: string) => {
+            setUserSearchQuery(value);
+        }, 300),
+        []
+    );
+
     // Update state when task prop changes
     useEffect(() => {
         if (task) {
@@ -157,22 +207,60 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
                 due_date: task.due_date || '',
                 assigned_userid: task.assigned_userid || 0
             });
+
+            // Set the initial assigned user display
+            if (task.assigned?.username) {
+                setAssignedUserDisplay(task.assigned.username);
+            } else if (task.assigned_userid > 0) {
+                setAssignedUserDisplay(`User ID: ${task.assigned_userid}`);
+            } else {
+                setAssignedUserDisplay('');
+            }
         }
     }, [task]);
 
+
+
     const handleFieldClick = (field: keyof TaskEditState): void => {
         setEditingField(field);
-        
-        const currVal = taskData[field];
-        setTempValue(currVal?.toString() || '');
+
+        if (field === 'assigned_userid') {
+            setTempValue('');
+            setUserSearchQuery('');
+        } else {
+            const currVal = taskData[field];
+            setTempValue(currVal?.toString() || '');
+        }
+    };
+
+    const handleUserSelect = (user: any) => {
+        setTempValue(user.username);
+        setSelectedUserId(user.id);
+        setUserSearchQuery('');
+        // Don't exit editing mode - let user confirm with save button
+    };
+
+    const handleUserSearchChange = (value: string) => {
+        setTempValue(value);
+        debounceSearch(value);
     };
 
     const handleSave = async (field: keyof TaskEditState, value: string): Promise<void> => {
         let processedValue: string | number = value;
+        let newDisplayValue = '';
         
-        // Convert to number for assigned_userid
         if (field === 'assigned_userid') {
-            processedValue = parseInt(value) || 0;
+            if (selectedUserId !== null) {
+                processedValue = selectedUserId;
+                newDisplayValue = value; // value should be the username
+            } else if (!isNaN(Number(value))) {
+                processedValue = parseInt(value) || 0;
+                newDisplayValue = processedValue > 0 ? `User ID: ${processedValue}` : '';
+            } else {
+                const foundUser = userSuggestions.find(user => user.username === value);
+                processedValue = foundUser?.id || 0;
+                newDisplayValue = value;
+            }
         }
         
         const updatedData = {
@@ -180,14 +268,21 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
             [field]: processedValue
         };
         
+        // Update states immediately for UI responsiveness
         setTaskData(updatedData);
+        if (field === 'assigned_userid') {
+            setAssignedUserDisplay(newDisplayValue);
+        }
+        
         setEditingField(null);
         setTempValue('');
+        setUserSearchQuery('');
+        setSelectedUserId(null);
 
         // Auto-save to API
         if (task?.id) {
             try {
-                await updateTask({
+                const updatePayload = {
                     task_id: task.id,
                     data: {
                         title: updatedData.title,
@@ -198,30 +293,44 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
                         assigned_userid: updatedData.assigned_userid
                     },
                     project_id: Number(projectid)
-                }).unwrap();
+                };
+                
+                await updateTask(updatePayload).unwrap();
             } catch (error) {
                 console.error('Failed to update task:', error);
+                // Revert on error
+                setTaskData(taskData);
+                if (field === 'assigned_userid') {
+                    if (task.assigned?.username) {
+                        setAssignedUserDisplay(task.assigned.username);
+                    } else if (task.assigned_userid > 0) {
+                        setAssignedUserDisplay(`User ID: ${task.assigned_userid}`);
+                    } else {
+                        setAssignedUserDisplay('');
+                    }
+                }
+                setSelectedUserId(null);
             }
         }
     };
 
-    const handleDeleteTask = async () : Promise<void> => {
-        if(task?.id){
-            try{
+    const handleDeleteTask = async (): Promise<void> => {
+        if (task?.id) {
+            try {
                 await deleteTask({taskId: task.id}).unwrap();
                 onClose();
-            } catch(error){
-                console.log("error deleting task: ",error);
+            } catch (error) {
+                console.log("error deleting task: ", error);
             }
         }
         setShowDeleteConfirm(false);
-    }
+    };
 
     const formatDateForInput = (dateString: string) => {
         if (!dateString) return '';
         try {
             const parsed = parseISO(dateString);
-            return format(parsed, 'dd-MM-yyyy');
+            return format(parsed, 'yyyy-MM-dd'); // Changed to yyyy-MM-dd for HTML date input
         } catch {
             return dateString;
         }
@@ -230,9 +339,14 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
     const handleCancel = (): void => {
         setEditingField(null);
         setTempValue('');
+        setUserSearchQuery('');
+        setSelectedUserId(null); // Reset selected user ID on cancel
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof TaskEditState): void => {
+    const handleKeyDown = (
+        e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+        field: keyof TaskEditState
+    ): void => {
         if (e.key === 'Enter') {
             e.preventDefault();
             handleSave(field, tempValue);
@@ -245,8 +359,8 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
     const getPriorityColor = (priority: string): string => {
         switch (priority) {
             case 'Urgent': return 'bg-red-600 text-white border-red-600';
-            case 'High': return 'bg-red-100 text-red-800 border-red-200';
-            case 'Medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'High': return 'bg-orange-100 text-orange-800 border-orange-200';
+            case 'Medium': return 'bg-blue-100 text-blue-800 border-blue-200';
             case 'Low': return 'bg-green-100 text-green-800 border-green-200';
             case 'Backlog': return 'bg-gray-100 text-gray-800 border-gray-200';
             default: return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -420,22 +534,26 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                             <User size={16} className="inline mr-1" />
-                            Assigned User ID
+                            Assigned User
                         </label>
-                        <EditableField 
-                            field="assigned_userid" 
-                            value={taskData.assigned_userid.toString()} 
-                            type="number"
+                        <EditableField
+                            field="assigned_userid"
+                            value={assignedUserDisplay}
+                            type="user-search"
                             onSave={handleSave}
                             isEditing={editingField === 'assigned_userid'}
                             tempValue={tempValue}
-                            onTempValueChange={setTempValue}
+                            onTempValueChange={handleUserSearchChange}
                             onCancel={handleCancel}
                             onKeyDown={handleKeyDown}
                             isLoading={isLoading}
                             onStartEditing={handleFieldClick}
+                            userSuggestions={userSuggestions}
+                            onUserSelect={handleUserSelect}
+                            userSearchQuery={userSearchQuery}
                         />
                     </div>
+
                           {showDeleteConfirm && (
                               <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
                                   <p className="text-red-800 dark:text-red-300 text-sm mb-3">
@@ -483,7 +601,7 @@ const ModalEditTask = ({projectid, isOpen, onClose, task}: Props) => {
         <div className="w-80 border-l pl-6">
           <ModalComment
             taskId={task?.id || 0} 
-            userId={currUserId} // will change that
+            userId={currUserId}
           />
         </div>
     </div>

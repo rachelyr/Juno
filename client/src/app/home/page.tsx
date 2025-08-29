@@ -282,16 +282,16 @@ const HomePage = () => {
     );
 
   return (
-    <div className='container h-full w-[100%] bg-gray-100 dark:bg-dark-bg p-8'>
+    <div className='h-full flex-1 bg-gray-100 dark:bg-dark-bg p-8'>
         <Toaster/>
         <ModalNewProject
             isOpen={isModalNewProjectOpen}
             onClose={() => setIsModalNewProjectOpen(false)}    
         />
-        <Header name='Project Management Dashboard'
+        <Header name='Project Dashboard'
         buttonComponent={
                 <button
-                  className='flex items-center rounded-md bg-blue-primary px-3 py-2 text-white hover:bg-blue-600 hover:cursor-pointer'
+                  className='flex items-center rounded-md bg-blue-primary p-2 sm:px-3 text-sm sm:py-2 sm:text-base text-white hover:bg-blue-600 hover:cursor-pointer'
                   onClick={() => setIsModalNewProjectOpen(true)}
                 >
                     <PlusSquare className='mr-2 h-5 w-5'/> New Board
