@@ -31,6 +31,8 @@ const ModalNewMembers = ({isOpen, onClose, team_id}: Props) => {
             team_id: team_id
         })
         
+        setMembers([])
+        setMemberInput("")
         onClose();
     };
 

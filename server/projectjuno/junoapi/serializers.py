@@ -50,7 +50,6 @@ class ProjectSerializer(serializers.ModelSerializer):
         validated_data['owner_id'] = user
         return super().create(validated_data)
 
-#may not be required
 class ProjectTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectTeam

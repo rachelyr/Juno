@@ -8,7 +8,8 @@ import Timeline from '../TimelineView';
 import Table from '../TableView';
 import ModalNewTask from '@/components/ModalNewTask';
 import ModalEditTask from '@/components/ModalEditTask';
-import { Task } from '@/state/api';
+import { Task, useGetProjectByIdQuery } from '@/state/api';
+import Loader from '@/components/Loader';
 
 type Props = {
     params: Promise<{id: string}>;
@@ -16,6 +17,8 @@ type Props = {
 
 const Project = ({params}: Props) => {
     const {id} = use(params);
+    const projectId = Number(id);
+    const { error, isLoading} = useGetProjectByIdQuery(projectId);
     const [activeTab, setActiveTab] = useState("Board"); //done for tracking Board, List or Timeline state
     const [isModalNewTaskOpen, setIsModelNewTaskOpen] = useState(false);
     const [isModalEditTaskOpen, setIsModalEditTaskOpen] = useState(false);
@@ -30,6 +33,18 @@ const Project = ({params}: Props) => {
         setIsModalEditTaskOpen(false);
         setSelectedTask(undefined);
     };
+
+    if (isLoading) return <Loader/>;
+
+    if (error) {
+        if ("status" in error && error.status === 404) {
+            return <div>❌ Project not found</div>;
+        }
+        if ("status" in error && error.status === 403) {
+            return <div>🚫 You don&apos;t have access to this project</div>;
+        }
+        return <div>⚠️ Something went wrong</div>;
+    }
 
     return (
         <div>

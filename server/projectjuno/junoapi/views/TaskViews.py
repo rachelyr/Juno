@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 from django.db.models import Q  
 
-from junoapi.models import Task
+from junoapi.models import Task, User
 from junoapi.serializers import TaskSerializer, TaskStatusSerializer
 from junoapi.selectors import get_tasks
+from junoapi.permissions import isAdminOrTaskAuthor
 
 class TaskView(generics.ListCreateAPIView):
     serializer_class = TaskSerializer
@@ -30,22 +32,23 @@ class GetUserTasksView(generics.ListAPIView):
     permission_classes=[IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
+        pk = self.kwargs.get('pk')
 
-        return Task.objects.filter(
-            Q(assigned_userid = user.id)
-        )
+        if not User.objects.filter(pk=pk).exists():
+            raise NotFound(detail="User not found")
+        return Task.objects.filter(assigned_userid=pk)
     
 class UpdateTaskView(generics.RetrieveUpdateAPIView):
+    queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, isAdminOrTaskAuthor]
 
     def get_queryset(self):
-        project_id = self.request.query_params.get('project_id')
+        project_id = self.request.query_params.get("project_id")
         return Task.objects.filter(project_id=project_id)
     
 
 class DeleteTaskView(generics.DestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,isAdminOrTaskAuthor]

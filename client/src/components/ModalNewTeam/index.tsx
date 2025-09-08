@@ -118,7 +118,7 @@ const ModalNewTeam = ({isOpen, onClose}: Props) => {
     };
 
     const isFormValid = () => {
-        return teamName && productOwner;
+        return teamName && productOwner && projectManager;
     };
 
     const inputStyles = "w-full rounded border border-gray-300 p-2 shadow-sm dark:border-dark-teritary dark:bg-dark-teritary dark:text-white dark:focus:outline-none";

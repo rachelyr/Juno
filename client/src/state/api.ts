@@ -132,6 +132,10 @@ export const api = createApi({
             query: () => "api/projects/",  //short hand notation
             providesTags: ["Project"],
         }),
+        getProjectById: build.query<Project[], number>({
+            query: (id) => `api/projects/${id}`,
+            providesTags: ['Project'] 
+        }),
         getUserOwnedProjects: build.query<Project[], void>({
             query: () => 'api/projects/user/',
             providesTags: ['Project']
@@ -318,6 +322,7 @@ export const api = createApi({
 export const {
     useGetAuthUserQuery,
     useGetProjectsQuery,
+    useGetProjectByIdQuery,
     useGetUserOwnedProjectsQuery,
     useCreateProjectsMutation,
     useDeleteProjectMutation,
