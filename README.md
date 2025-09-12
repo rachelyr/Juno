@@ -90,6 +90,6 @@ For any suggestions please feel free to connect with me -
 
 Made with 💙 by **[Rachel Yorke]**  
 📫 rachel.yorke225@gmail.com  
-🔗 [LinkedIn](www.linkedin.com/in/rachel-yorke-0a1814254) | [GitHub](https://github.com/rachelyr)
+🔗 [LinkedIn](https://www.linkedin.com/in/rachel-yorke-0a1814254) | [GitHub](https://github.com/rachelyr)
 
 ---
