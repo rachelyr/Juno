@@ -22,8 +22,5 @@ def get_teams(self):
         'productowner_userid',
         'projectmanager_userid'
     )
-
-    # if id:
-    #     queryset = queryset.filter(id=id)
     
     return queryset
