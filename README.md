@@ -9,7 +9,7 @@ Juno provides great visualisation for users to track and handle their tasks effi
 
 ## 🌐 Live Demo
 
-[🚀 Deployed Link](https://main.d7m56ktijbm4w.amplifyapp.com/) 
+[🚀 Deployed Link](https://main.d7m56ktijbm4w.amplifyapp.com/) -- (Currently not available)
 
 ---
 
